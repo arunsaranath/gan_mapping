@@ -1,0 +1,39 @@
+    def _knwnClass_acc(self, data, labels, clustLabels):
+        """
+        This function is used to check the accuracy of the clustering interms of the labeled samples (from both the
+        probe set-both anchor and validation portions). The points are considered correctly clustered if a majority of
+        the labeled points are in the same cluster
+
+        :param data: [ndarray: nSamples X nDims]
+        The data on which the number of clusters are to be estimated.
+
+        :param labels: [ndarrau: nSamples]
+        The label set for the classes which are labeled.
+
+        :param clustLabels: [ndarray: nSamples]
+        The is a 1D array with the estimated cluster labels
+
+        :return: returns mean accuracy for clusters which contain the labeled classes
+        """
+
+        'Initialize the output variable for both clusters with known and unknown data'
+        knwnCluster_acc = []
+        unknwnCluster_CVI = []
+
+        'Calculate for the data'
+        sample_silhouette_value = sil_samp(data, clustLabels)
+
+        "Iterate over the clusters"
+        for cluster in np.unique(clustLabels):
+            unqClasses, classCounts= np.unique(labels[clustLabels == cluster], return_counts=True)
+            'Find the class with the most members'
+            maxClass_mem = np.argmax(classCounts)
+            if unqClasses[maxClass_mem] != -1:
+                'Since most of the samples are from the known data- evaluate CLUSTER ACCURACY'
+                knwnCluster_acc += [classCounts[maxClass_mem] / classCounts.sum()]
+            else:
+                idx = np.where(clustLabels == cluster)[0]
+                'Since most of the samples are from the unknown classes -  evaluate Cluster Validirty Index'
+                unknwnCluster_CVI += [np.mean(np.asarray(sample_silhouette_value[idx]))]
+
+        return np.argmax(np.asarray(knwnCluster_acc)), np.argmax(np.asarray(unknwnCluster_CVI))

@@ -1,0 +1,2 @@
+from allGANModels import generatorsGANModels
+from allGANModels import discriminatorsGANModels
